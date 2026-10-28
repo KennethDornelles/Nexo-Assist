@@ -49,6 +49,11 @@ enum DraftConfirmationState {
  CANCELLED
  EXPIRED
 }
+enum AgentExecutionState {
+ PROCESSING
+ COMPLETED
+ FAILED
+}
 model User {
  id String @id @default(cuid())
  name String
@@ -86,8 +91,25 @@ model Conversation {
  messages Message[]
  decisions AgentDecision[]
  handoffs Handoff[]
+ executions AgentExecution[]
+ processingExecutionId String? @unique
  @@index([employeeId, updatedAt])
  @@index([state, updatedAt])
+}
+model AgentExecution {
+ id String @id @default(cuid())
+ conversationId String
+ conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+ inputMessageId String @unique
+ inputMessage Message @relation("ExecutionInput",fields:[inputMessageId],references:[id])
+ state AgentExecutionState @default(PROCESSING)
+ responseMessageId String? @unique
+ responseMessage Message? @relation("ExecutionResponse",fields:[responseMessageId],references:[id])
+ decisionId String? @unique
+ startedAt DateTime @default(now())
+ finishedAt DateTime?
+ errorCode String?
+ @@index([conversationId,state])
 }
 model Message {
  id String @id @default(cuid())
@@ -99,6 +121,8 @@ model Message {
  content String
  eventId String @unique @default(cuid())
  createdAt DateTime @default(now())
+ inputExecution AgentExecution? @relation("ExecutionInput")
+ responseExecution AgentExecution? @relation("ExecutionResponse")
  @@index([conversationId, createdAt])
 }
 model Ticket {
