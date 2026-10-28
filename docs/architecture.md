@@ -8,4 +8,6 @@
 - Mastra é integrado atrás de `AgentService`; as ferramentas são serviços Nest com autorização baseada na sessão. O modo mock não tenta contatar OpenAI.
 - Ações da IA registram somente o que foi executado, evidências, justificativa operacional, duração e consumo quando disponível; confiança ausente é `null`, não inventada.
 
-Pendências desta etapa: SSE autenticado, CSRF de dupla submissão, console funcional de transferência e testes de integração PostgreSQL. Esses itens não devem ser tratados como implementados.
+CSRF usa token aleatório separado da sessão, exposto somente em cookie não-HttpOnly, enviado no cabeçalho `X-CSRF-Token`, comparado ao cookie e validado pelo hash ligado à sessão; a origem também é validada. `SESSION_SECRET` não é usado por sessões opacas e foi removido da configuração necessária.
+
+Pendências desta etapa: SSE autenticado, console funcional de transferência e testes de integração PostgreSQL. Esses itens não devem ser tratados como implementados.

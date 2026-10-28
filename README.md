@@ -28,7 +28,7 @@ Sessões usam cookie HttpOnly, SameSite=Lax e apenas hash do token no banco. A i
 
 ## Verificação
 
-`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Para PostgreSQL hospedado futuramente (inclusive Supabase), altere somente `DATABASE_URL` para uma URL PostgreSQL compatível e aplique `pnpm db:migrate`; esta etapa não depende de serviços proprietários.
+Nesta revisão foram verificados `prisma migrate deploy`, geração do Prisma Client, seed executado duas vezes e os builds de contracts, backend e frontend contra PostgreSQL local. Testes de integração, SSE autenticado, console com lista real e ferramentas Mastra com `createTool` continuam pendentes e não devem ser considerados entregues. Para PostgreSQL hospedado futuramente (inclusive Supabase), altere somente `DATABASE_URL` para uma URL PostgreSQL compatível e aplique `pnpm db:migrate`; esta etapa não depende de serviços proprietários.
 
 ## Próximas etapas
 

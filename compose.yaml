@@ -6,6 +6,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexo_local_password}
       POSTGRES_DB: ${POSTGRES_DB:-nexo_assist}
     volumes: [postgres_data:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
