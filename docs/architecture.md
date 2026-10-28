@@ -11,3 +11,7 @@
 CSRF usa token aleatório separado da sessão, exposto somente em cookie não-HttpOnly, enviado no cabeçalho `X-CSRF-Token`, comparado ao cookie e validado pelo hash ligado à sessão; a origem também é validada. `SESSION_SECRET` não é usado por sessões opacas e foi removido da configuração necessária.
 
 Pendências desta etapa: SSE autenticado, console funcional de transferência e testes de integração PostgreSQL. Esses itens não devem ser tratados como implementados.
+
+## Recuperação de execução
+
+Na inicialização, a única instância do backend marca execuções `PROCESSING` remanescentes como `FAILED` com `PROCESS_INTERRUPTED` e libera a ocupação correspondente. Não há reexecução automática. Esta estratégia não suporta múltiplas instâncias concorrentes; recuperação distribuída permanece pendente.
