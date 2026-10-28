@@ -1,0 +1,3 @@
+import { z } from 'zod';
+const schema=z.object({DATABASE_URL:z.string().url(),SESSION_SECRET:z.string().min(32),DEMO_AUTH_ENABLED:z.enum(['true','false']).default('false'),LLM_MODE:z.enum(['mock','real']).default('mock'),LLM_PROVIDER:z.literal('openai').default('openai'),LLM_MODEL:z.string().min(1).default('gpt-5.4-mini'),OPENAI_API_KEY:z.string().optional(),APP_TIMEZONE:z.string().default('America/Fortaleza'),WEB_ORIGIN:z.string().url()}).superRefine((v,c)=>{if(v.LLM_MODE==='real'&&!v.OPENAI_API_KEY)c.addIssue({code:'custom',message:'OPENAI_API_KEY é obrigatória quando LLM_MODE=real'})});
+export type Env=z.infer<typeof schema>; export const validate=(v:Record<string,unknown>):Env=>schema.parse(v);

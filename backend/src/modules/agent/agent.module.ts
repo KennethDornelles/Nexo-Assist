@@ -1,0 +1,1 @@
+import{Module}from'@nestjs/common';import{AgentService}from'./agent.service';import{KnowledgeModule}from'../knowledge/knowledge.module';import{TicketsModule}from'../tickets/tickets.module';@Module({imports:[KnowledgeModule,TicketsModule],providers:[AgentService],exports:[AgentService]})export class AgentModule{}

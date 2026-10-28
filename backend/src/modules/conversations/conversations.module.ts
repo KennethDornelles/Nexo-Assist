@@ -1,0 +1,1 @@
+import{Module}from'@nestjs/common';import{ConversationsController}from'./conversations.controller';import{ConversationsService}from'./conversations.service';import{AgentModule}from'../agent/agent.module';@Module({imports:[AgentModule],controllers:[ConversationsController],providers:[ConversationsService],exports:[ConversationsService]})export class ConversationsModule{}

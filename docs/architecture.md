@@ -1,0 +1,11 @@
+# Arquitetura e decisões
+
+- `backend/`: Nest modular, com módulos de auth, users, conversations, tickets, knowledge, agent, handoffs, audit e health.
+- `frontend/`: Next App Router; só usa HTTP e, futuramente, SSE.
+- `packages/contracts`: schemas e eventos sem Prisma/Nest.
+- Prisma em `backend/prisma`, PostgreSQL relacional e migrations versionadas. Não há SQL manual na aplicação.
+- Estado da conversa é independente do status de Ticket. Mensagens e estado são fonte de verdade no PostgreSQL; Mastra não mantém memória autoritativa.
+- Mastra é integrado atrás de `AgentService`; as ferramentas são serviços Nest com autorização baseada na sessão. O modo mock não tenta contatar OpenAI.
+- Ações da IA registram somente o que foi executado, evidências, justificativa operacional, duração e consumo quando disponível; confiança ausente é `null`, não inventada.
+
+Pendências desta etapa: SSE autenticado, CSRF de dupla submissão, console funcional de transferência e testes de integração PostgreSQL. Esses itens não devem ser tratados como implementados.

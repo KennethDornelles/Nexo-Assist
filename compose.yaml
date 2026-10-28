@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16.10-bookworm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nexo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexo_local_password}
+      POSTGRES_DB: ${POSTGRES_DB:-nexo_assist}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    env_file: backend/.env
+    environment: {DATABASE_URL: postgresql://nexo:nexo_local_password@postgres:5432/nexo_assist?schema=public}
+    ports: ["3001:3001"]
+    depends_on: {postgres: {condition: service_healthy}}
+  frontend:
+    build: {context: ., dockerfile: frontend/Dockerfile}
+    environment: {NEXT_PUBLIC_API_URL: http://localhost:3001}
+    ports: ["3000:3000"]
+    depends_on: [backend]
+volumes: {postgres_data: {}}

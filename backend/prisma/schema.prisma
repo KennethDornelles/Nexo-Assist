@@ -1,0 +1,180 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+enum Role {
+ EMPLOYEE
+ ANALYST
+}
+enum ConversationState {
+ AGENT_ACTIVE
+ WAITING_ANALYST
+ ANALYST_ACTIVE
+ CLOSED
+}
+enum MessageAuthor {
+ EMPLOYEE
+ AGENT
+ ANALYST
+ SYSTEM
+}
+enum TicketType {
+ INCIDENT
+ SERVICE_REQUEST
+ ACCESS
+}
+enum TicketPriority {
+ LOW
+ MEDIUM
+ HIGH
+ CRITICAL
+}
+enum TicketStatus {
+ OPEN
+ IN_PROGRESS
+ RESOLVED
+ CLOSED
+}
+enum DraftOperation {
+ CREATE
+ UPDATE
+ REOPEN
+}
+enum DraftConfirmationState {
+ PENDING
+ CONFIRMED
+ CANCELLED
+ EXPIRED
+}
+model User {
+ id String @id @default(cuid())
+ name String
+ email String @unique
+ role Role @default(EMPLOYEE)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ sessions Session[]
+ conversations Conversation[] @relation("employee")
+ assigned Conversation[] @relation("analyst")
+ messages Message[]
+ tickets Ticket[] @relation("requester")
+ updates TicketUpdate[]
+ drafts TicketDraft[]
+}
+model Session {
+ id String @id @default(cuid())
+ tokenHash String @unique
+ userId String
+ user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ @@index([userId, expiresAt])
+}
+model Conversation {
+ id String @id @default(cuid())
+ employeeId String
+ employee User @relation("employee", fields: [employeeId], references: [id])
+ assignedAnalystId String?
+ assignedAnalyst User? @relation("analyst", fields: [assignedAnalystId], references: [id])
+ state ConversationState @default(AGENT_ACTIVE)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ messages Message[]
+ decisions AgentDecision[]
+ handoffs Handoff[]
+ @@index([employeeId, updatedAt])
+ @@index([state, updatedAt])
+}
+model Message {
+ id String @id @default(cuid())
+ conversationId String
+ conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+ authorId String?
+ author User? @relation(fields: [authorId], references: [id])
+ authorType MessageAuthor
+ content String
+ eventId String @unique @default(cuid())
+ createdAt DateTime @default(now())
+ @@index([conversationId, createdAt])
+}
+model Ticket {
+ id String @id @default(cuid())
+ requesterId String
+ requester User @relation("requester", fields: [requesterId], references: [id])
+ title String
+ description String
+ type TicketType
+ category String
+ priority TicketPriority
+ status TicketStatus @default(OPEN)
+ affectedUsers Int @default(1)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ resolvedAt DateTime?
+ updates TicketUpdate[]
+ drafts TicketDraft[]
+ @@index([requesterId, status, updatedAt])
+}
+model TicketUpdate {
+ id String @id @default(cuid())
+ ticketId String
+ ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+ authorId String
+ author User @relation(fields: [authorId], references: [id])
+ content String
+ createdAt DateTime @default(now())
+ @@index([ticketId, createdAt])
+}
+model TicketDraft {
+ id String @id @default(cuid())
+ ticketId String?
+ ticket Ticket? @relation(fields: [ticketId], references: [id])
+ authorId String
+ author User @relation(fields: [authorId], references: [id])
+ operation DraftOperation
+ payload Json
+ version Int @default(1)
+ confirmationState DraftConfirmationState @default(PENDING)
+ idempotencyKey String @unique
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+}
+model KnowledgeArticle {
+ id String @id @default(cuid())
+ title String
+ content String
+ operatingSystem String?
+ metadata Json
+ publishedAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([publishedAt])
+}
+model AgentDecision {
+ id String @id @default(cuid())
+ conversationId String
+ conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+ messageId String?
+ intent String
+ actions Json
+ evidence Json
+ decision String
+ rationale String
+ confidenceHeuristic Float?
+ durationMs Int
+ tokenUsage Json?
+ createdAt DateTime @default(now())
+ @@index([conversationId, createdAt])
+}
+model Handoff {
+ id String @id @default(cuid())
+ conversationId String
+ conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+ reason String
+ summary String
+ assignedAnalystId String?
+ createdAt DateTime @default(now())
+ @@index([conversationId, createdAt])
+}
