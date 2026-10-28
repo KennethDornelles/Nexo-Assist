@@ -5,4 +5,4 @@ export const ticketStatusSchema=z.enum(['OPEN','IN_PROGRESS','RESOLVED','CLOSED'
 export const messageInputSchema=z.object({content:z.string().trim().min(1).max(4000)});
 export const articleSearchSchema=z.object({query:z.string().trim().min(1).max(120),page:z.coerce.number().int().min(1).default(1)});
 export const ticketDraftProposalSchema=z.object({operation:z.enum(['CREATE','UPDATE','REOPEN']),ticketId:z.string().cuid().optional(),payload:z.record(z.string(),z.unknown())});
-export type SseMessageEvent={id:string;type:'message';conversationId:string;data:{id:string;authorType:string;content:string;createdAt:string}};
+export type ConversationSseEvent={id:string;type:'message'|'processing'|'completed'|'failed';conversationId:string;data:{messageId?:string;authorType?:'EMPLOYEE'|'AGENT'|'SYSTEM';content?:string;createdAt?:string;error?:string}};
